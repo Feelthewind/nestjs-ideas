@@ -11,6 +11,11 @@ export class UserService {
     private userRepository: Repository<UserEntity>,
   ) {}
 
+  async showAll() {
+    const users = await this.userRepository.find();
+    return users.map(user => user.toResponseObject(false));
+  }
+
   async register(data: UserDTO) {
     const { username } = data;
     let user = await this.userRepository.findOne({ where: { username } });
