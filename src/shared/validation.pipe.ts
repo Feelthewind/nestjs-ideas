@@ -49,11 +49,9 @@ export class ValidationPipe implements PipeTransform {
     return !types.find(type => metatype === type);
   }
 
-  private isEmpty(object: any) {
-    for (const property in object) {
-      if (object.hasOwnProperty(property)) {
-        return false;
-      }
+  private isEmpty(value: any) {
+    if (Object.keys(value).length > 0) {
+      return false;
     }
     return true;
   }
