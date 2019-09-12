@@ -24,8 +24,8 @@ export class IdeaController {
   }
 
   @Post()
-  createIdea(@Body() createData: IdeaDTO) {
-    return this.ideaService.create(createData);
+  createIdea(@Body() body: IdeaDTO) {
+    return this.ideaService.create(body);
   }
 
   @Get(':id')
@@ -34,8 +34,8 @@ export class IdeaController {
   }
 
   @Put(':id')
-  updateIdea(@Param('id') id: string, @Body() updateData: Partial<IdeaDTO>) {
-    return this.ideaService.update(id, updateData);
+  updateIdea(@Param('id') id: string, @Body() body: Partial<IdeaDTO>) {
+    return this.ideaService.update(id, body);
   }
 
   @Delete(':id')
