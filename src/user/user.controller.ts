@@ -4,12 +4,12 @@ import {
   Get,
   Logger,
   Post,
+  Query,
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
 import { AuthGuard } from '../shared/auth.guard';
 import { ValidationPipe } from '../shared/validation.pipe';
-import { User } from './user.decorator';
 import { UserDTO } from './user.dto';
 import { UserService } from './user.service';
 
@@ -35,8 +35,7 @@ export class UserController {
 
   @Get('api/users')
   @UseGuards(new AuthGuard())
-  showAllUsers(@User() user) {
-    console.log(user);
-    return this.userService.showAll();
+  showAllUsers(@Query('page') page: number) {
+    return this.userService.showAll(page);
   }
 }

@@ -17,6 +17,13 @@ export class CommentService {
     private userRepository: Repository<UserEntity>,
   ) {}
 
+  private toResponseObject(comment: CommentEntity) {
+    return {
+      ...comment,
+      author: comment.author && comment.author.toResponseObject(),
+    };
+  }
+
   async create(ideaId: string, userId: string, data: CommentDTO) {
     const idea = await this.ideaRepository.findOne({ id: ideaId });
     const user = await this.userRepository.findOne({ id: userId });
@@ -29,24 +36,25 @@ export class CommentService {
     return comment;
   }
 
-  async showByIdea(ideaId: string) {
-    const idea = await this.ideaRepository.findOne({
-      where: { id: ideaId },
-      relations: ['comments', 'comments.author', 'comments.idea'],
+  async showByIdea(ideaId: string, page: number = 1) {
+    const comments = await this.commentRepository.find({
+      where: { idea: { id: ideaId } },
+      relations: ['author', 'idea'],
+      take: 25,
+      skip: 25 * (page - 1),
     });
 
-    return idea.comments;
+    return comments.map(comment => this.toResponseObject(comment));
   }
 
-  async showByUser(userId: string) {
+  async showByUser(userId: string, page: number = 1) {
     const comments = await this.commentRepository.find({
       where: { author: userId },
-      relations: ['author'],
+      relations: ['author', 'idea'],
+      take: 25,
+      skip: 25 * (page - 1),
     });
-    return comments.map(comment => ({
-      ...comment,
-      author: comment.author.toResponseObject(false),
-    }));
+    return comments.map(comment => this.toResponseObject(comment));
   }
 
   async show(id: string) {

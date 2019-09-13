@@ -14,9 +14,11 @@ export class UserService {
     private ideaRepository: Repository<IdeaEntity>,
   ) {}
 
-  async showAll() {
+  async showAll(page: number) {
     const users = await this.userRepository.find({
       relations: ['ideas', 'bookmarks'],
+      take: 25,
+      skip: 25 * (page - 1),
     });
     return users.map(user => user.toResponseObject(false));
   }
