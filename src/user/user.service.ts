@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { IdeaEntity } from '../idea/idea.entity';
 import { UserDTO } from './user.dto';
 import { UserEntity } from './user.entity';
 
@@ -9,10 +10,14 @@ export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
+    @InjectRepository(IdeaEntity)
+    private ideaRepository: Repository<IdeaEntity>,
   ) {}
 
   async showAll() {
-    const users = await this.userRepository.find({ relations: ['ideas'] });
+    const users = await this.userRepository.find({
+      relations: ['ideas', 'bookmarks'],
+    });
     return users.map(user => user.toResponseObject(false));
   }
 
