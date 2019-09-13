@@ -7,9 +7,12 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
   UsePipes,
 } from '@nestjs/common';
+import { AuthGuard } from '../shared/auth.guard';
 import { ValidationPipe } from '../shared/validation.pipe';
+import { User } from '../user/user.decorator';
 import { IdeaDTO } from './idea.dto';
 import { IdeaService } from './idea.service';
 
@@ -19,33 +22,47 @@ export class IdeaController {
 
   constructor(private ideaService: IdeaService) {}
 
+  private logData(options: any) {
+    options.user && this.logger.log(`USER ${JSON.stringify(options.user)}`);
+    options.body && this.logger.log(`BODY ${JSON.stringify(options.body)}`);
+    options.id && this.logger.log(`IDEA ${JSON.stringify(options.id)}`);
+  }
+
   @Get()
   showAllIdeas() {
-    this.logger.log('show idea');
     return this.ideaService.showAll();
   }
 
   @Post()
+  @UseGuards(new AuthGuard())
   @UsePipes(new ValidationPipe())
-  createIdea(@Body() body: IdeaDTO) {
-    this.logger.log(JSON.stringify(body));
-    return this.ideaService.create(body);
+  createIdea(@User() user, @Body() body: IdeaDTO) {
+    this.logData({ user, body });
+    return this.ideaService.create(user.id, body);
   }
 
   @Get(':id')
   readIdea(@Param('id') id: string) {
+    this.logData({ id });
     return this.ideaService.read(id);
   }
 
   @Put(':id')
+  @UseGuards(new AuthGuard())
   @UsePipes(new ValidationPipe())
-  updateIdea(@Param('id') id: string, @Body() body: Partial<IdeaDTO>) {
-    this.logger.log(JSON.stringify(body));
-    return this.ideaService.update(id, body);
+  updateIdea(
+    @Param('id') id: string,
+    @User('id') user,
+    @Body() body: Partial<IdeaDTO>,
+  ) {
+    this.logData({ id, user, body });
+    return this.ideaService.update(id, user, body);
   }
 
   @Delete(':id')
-  destroyIdea(@Param('id') id: string) {
-    return this.ideaService.destroy(id);
+  @UseGuards(new AuthGuard())
+  destroyIdea(@Param('id') id: string, @User() user) {
+    this.logData({ id, user });
+    return this.ideaService.destroy(id, user.id);
   }
 }
